@@ -13,18 +13,28 @@
         </div>
 
         <div class="section-preview">
-          <component :is="section.component" v-bind="section.variants[0].fixture" />
+          <component
+            :is="section.component"
+            v-bind="getSelectedVariant(section).fixture"
+          />
         </div>
 
         <div class="section-variants">
-          <p class="variants-title">Variants</p>
+          <div class="variants-header">
+            <p class="variants-title">Variants</p>
+            <button class="add-button" type="button" @click="addToBlueprint(section)">
+              Add to Blueprint
+            </button>
+          </div>
           <div class="variant-list">
             <button
               v-for="variant in section.variants"
               :key="variant.id"
               class="variant-pill"
+              :class="{ active: variant.id === getSelectedVariant(section).id }"
               type="button"
               title="Variant switching coming soon"
+              @click="selectVariant(section.id, variant.id)"
             >
               {{ variant.label }}
             </button>
@@ -36,10 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { getCategory, getSectionsByCategory } from "../lib/registry";
 import type { CategoryId } from "../lib/types";
+import { blueprintStore } from "../lib/blueprintStore";
 
 const route = useRoute();
 const categoryId = computed(() => route.params.categoryId as CategoryId);
@@ -47,6 +58,23 @@ const category = computed(() => getCategory(categoryId.value));
 const sections = computed(() =>
   category.value ? getSectionsByCategory(category.value.id) : []
 );
+
+const selectedVariantIds = reactive<Record<string, string>>({});
+
+const getSelectedVariant = (section: { id: string; variants: { id: string; fixture: Record<string, unknown> }[] }) => {
+  const fallback = section.variants[0];
+  const selectedId = selectedVariantIds[section.id] ?? fallback.id;
+  return section.variants.find((variant) => variant.id === selectedId) ?? fallback;
+};
+
+const selectVariant = (sectionId: string, variantId: string) => {
+  selectedVariantIds[sectionId] = variantId;
+};
+
+const addToBlueprint = (section: { id: string; variants: { id: string; fixture: Record<string, unknown> }[] }) => {
+  const variant = getSelectedVariant(section);
+  blueprintStore.addItem(section.id, variant.id, variant.fixture);
+};
 </script>
 
 <style scoped>
@@ -105,12 +133,34 @@ const sections = computed(() =>
   gap: 8px;
 }
 
+.variants-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .variants-title {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.75rem;
   color: #94a3b8;
   margin: 0;
+}
+
+.add-button {
+  border: none;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  background: #1e293b;
 }
 
 .variant-list {
@@ -126,5 +176,11 @@ const sections = computed(() =>
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 0.85rem;
+}
+
+.variant-pill.active {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #0f172a;
 }
 </style>

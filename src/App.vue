@@ -20,6 +20,11 @@
             {{ category.name }}
           </RouterLink>
         </nav>
+        <p class="sidebar-title">Blueprint</p>
+        <nav class="sidebar-nav">
+          <RouterLink class="sidebar-link" to="/blueprint">Blueprint</RouterLink>
+          <RouterLink class="sidebar-link" to="/blueprints">Saved Blueprints</RouterLink>
+        </nav>
       </aside>
 
       <main class="app-main">
