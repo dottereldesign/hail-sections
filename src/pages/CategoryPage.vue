@@ -101,6 +101,14 @@ const isAdded = (sectionId: string) => Boolean(addedSectionIds[sectionId]);
   background: #ffffff;
   border-radius: 0;
   border: 1px solid rgba(15, 23, 42, 0.08);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.section-card:hover {
+  border-color: var(--hail-green);
+  box-shadow: 0 0 0 1px var(--hail-green);
 }
 
 .section-label {

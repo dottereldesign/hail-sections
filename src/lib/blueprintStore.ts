@@ -122,6 +122,17 @@ export const blueprintStore = {
     updateCurrent(next);
   },
 
+  moveItemToIndex(instanceId: string, targetIndex: number) {
+    const index = state.current.items.findIndex((item) => item.instanceId === instanceId);
+    if (index === -1) return;
+    const clampedIndex = Math.max(0, Math.min(targetIndex, state.current.items.length - 1));
+    if (index === clampedIndex) return;
+    const next = [...state.current.items];
+    const [item] = next.splice(index, 1);
+    next.splice(clampedIndex, 0, item);
+    updateCurrent(next);
+  },
+
   clearBlueprint() {
     updateCurrent([]);
   },

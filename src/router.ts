@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "./pages/HomePage.vue";
 import CategoryPage from "./pages/CategoryPage.vue";
-import BlueprintPage from "./pages/BlueprintPage.vue";
+import WorkspacePage from "./pages/Workspace.vue";
 import BlueprintsPage from "./pages/BlueprintsPage.vue";
 import NotFoundPage from "./pages/NotFoundPage.vue";
 import { getCategory } from "./lib/registry";
@@ -27,7 +27,7 @@ const router = createRouter({
     {
       path: "/workspace",
       name: "workspace",
-      component: BlueprintPage
+      component: WorkspacePage
     },
     {
       path: "/blueprints",

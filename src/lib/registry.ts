@@ -13,17 +13,17 @@ import { socialLinksPlaceholderDefault } from "../sections/social-links/SocialLi
 export const categories: CategoryDefinition[] = [
   {
     id: "footers",
-    name: "Footers",
+    name: "Footer",
     description: "Structured footer blocks with navigation and legal info."
   },
   {
     id: "heroes",
-    name: "Heroes",
+    name: "Hero",
     description: "Large hero blocks with strong visual presence."
   },
   {
     id: "navbars",
-    name: "Navbars",
+    name: "Navbar",
     description: "Top navigation bars with branding, links, and actions."
   },
   {

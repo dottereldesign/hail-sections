@@ -1,10 +1,19 @@
 <template>
   <div class="app-shell">
     <header class="app-header">
-      <div>
-        <p class="header-eyebrow">Component Gallery</p>
-        <h1 class="header-title">Sections Library</h1>
+      <div class="header-brand">
+        <RouterLink class="brand-link" to="/">
+          <h1 class="header-title">
+            <span class="brand-hail">Hail</span>
+            <span class="brand-builder">Block Builder</span>
+          </h1>
+        </RouterLink>
       </div>
+      <nav class="header-nav" aria-label="Workspace">
+        <RouterLink class="header-link" to="/workspace">Workspace</RouterLink>
+        <RouterLink class="header-link" to="/blueprints">Saved Blueprints</RouterLink>
+      </nav>
+      <div class="header-spacer" aria-hidden="true"></div>
     </header>
 
     <div class="app-body">
@@ -19,11 +28,6 @@
           >
             {{ category.name }}
           </RouterLink>
-        </nav>
-        <p class="sidebar-title">Workspace</p>
-        <nav class="sidebar-nav">
-          <RouterLink class="sidebar-link" to="/workspace">Workspace</RouterLink>
-          <RouterLink class="sidebar-link" to="/blueprints">Saved Blueprints</RouterLink>
         </nav>
       </aside>
 

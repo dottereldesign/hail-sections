@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
 
 :root {
   --hail-green: #72af2e;
@@ -38,23 +38,79 @@ body {
 }
 
 .app-header {
-  padding: 24px 32px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 8px 16px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(8px);
 }
 
-.header-eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
-  font-size: 0.7rem;
-  color: #64748b;
-  margin: 0 0 6px;
-}
-
 .header-title {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
+  display: inline-flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.header-brand {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.brand-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-link:focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.6);
+  outline-offset: 4px;
+}
+
+.brand-hail {
+  color: var(--hail-green);
+  font-weight: 700;
+  text-transform: lowercase;
+}
+
+.brand-builder {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.header-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.header-link {
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #0f172a;
+  font-weight: 600;
+  background: transparent;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.header-link:hover {
+  background: #e2e8f0;
+}
+
+.header-nav .router-link-active {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.header-spacer {
+  min-height: 1px;
 }
 
 .app-body {
@@ -106,7 +162,7 @@ body {
   background: #e2e8f0;
 }
 
-.router-link-active {
+.sidebar-link.router-link-active {
   background: #0f172a;
   color: #f8fafc;
 }
@@ -116,6 +172,16 @@ body {
 }
 
 @media (max-width: 900px) {
+  .app-header {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .header-brand {
+    justify-content: center;
+  }
+
   .app-body {
     grid-template-columns: 1fr;
   }

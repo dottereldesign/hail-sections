@@ -2,7 +2,7 @@
   <section class="page">
     <header class="page-header">
       <div>
-        <h1>Blueprint</h1>
+        <h1>Workspace</h1>
         <p>Assemble sections into a shareable layout.</p>
       </div>
       <div class="header-actions">
@@ -24,7 +24,20 @@
     </div>
 
     <div v-else class="blueprint-list">
-      <article v-for="item in items" :key="item.instanceId" class="blueprint-card">
+      <article
+        v-for="item in items"
+        :key="item.instanceId"
+        class="blueprint-card"
+        :class="{
+          dragging: draggingId === item.instanceId,
+          'drop-target': dropTargetId === item.instanceId
+        }"
+        draggable="true"
+        @dragstart="onDragStart(item.instanceId, $event)"
+        @dragend="onDragEnd"
+        @dragover.prevent="onDragOver(item.instanceId)"
+        @drop.prevent="onDrop(item.instanceId)"
+      >
         <div class="card-actions">
           <button class="chip" type="button" @click="moveUp(item.instanceId)">
             Up
@@ -79,10 +92,14 @@ import { getSection } from "../lib/registry";
 const router = useRouter();
 const items = computed(() => blueprintStore.current.value.items);
 const showFullscreen = ref(false);
+const draggingId = ref<string | null>(null);
+const dropTargetId = ref<string | null>(null);
 
 const remove = (instanceId: string) => blueprintStore.removeItem(instanceId);
 const moveUp = (instanceId: string) => blueprintStore.moveItemUp(instanceId);
 const moveDown = (instanceId: string) => blueprintStore.moveItemDown(instanceId);
+const moveTo = (instanceId: string, targetIndex: number) =>
+  blueprintStore.moveItemToIndex(instanceId, targetIndex);
 const clearBlueprint = () => blueprintStore.clearBlueprint();
 
 const saveBlueprint = () => {
@@ -95,6 +112,38 @@ const saveBlueprint = () => {
 const exitOnEscape = (event: KeyboardEvent) => {
   if (event.key !== "Escape") return;
   showFullscreen.value = false;
+};
+
+const onDragStart = (instanceId: string, event: DragEvent) => {
+  draggingId.value = instanceId;
+  dropTargetId.value = instanceId;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", instanceId);
+  }
+};
+
+const onDragOver = (instanceId: string) => {
+  dropTargetId.value = instanceId;
+};
+
+const onDrop = (targetId: string) => {
+  if (!draggingId.value) return;
+  const dragIndex = items.value.findIndex((item) => item.instanceId === draggingId.value);
+  const targetIndex = items.value.findIndex((item) => item.instanceId === targetId);
+  if (dragIndex === -1 || targetIndex === -1 || dragIndex === targetIndex) {
+    draggingId.value = null;
+    dropTargetId.value = null;
+    return;
+  }
+  moveTo(draggingId.value, targetIndex);
+  draggingId.value = null;
+  dropTargetId.value = null;
+};
+
+const onDragEnd = () => {
+  draggingId.value = null;
+  dropTargetId.value = null;
 };
 
 onMounted(() => {
@@ -178,6 +227,25 @@ onUnmounted(() => {
   position: relative;
   display: grid;
   gap: 10px;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.blueprint-card:hover {
+  border-color: var(--hail-green);
+  box-shadow: 0 0 0 1px var(--hail-green);
+}
+
+.blueprint-card.dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+}
+
+.blueprint-card.drop-target {
+  border-color: var(--hail-green);
+  box-shadow: 0 0 0 2px rgba(114, 175, 46, 0.35);
 }
 
 .card-actions {
