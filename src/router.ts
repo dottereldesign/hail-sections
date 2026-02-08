@@ -25,8 +25,8 @@ const router = createRouter({
       }
     },
     {
-      path: "/blueprint",
-      name: "blueprint",
+      path: "/workspace",
+      name: "workspace",
       component: BlueprintPage
     },
     {

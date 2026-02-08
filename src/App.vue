@@ -20,9 +20,9 @@
             {{ category.name }}
           </RouterLink>
         </nav>
-        <p class="sidebar-title">Blueprint</p>
+        <p class="sidebar-title">Workspace</p>
         <nav class="sidebar-nav">
-          <RouterLink class="sidebar-link" to="/blueprint">Blueprint</RouterLink>
+          <RouterLink class="sidebar-link" to="/workspace">Workspace</RouterLink>
           <RouterLink class="sidebar-link" to="/blueprints">Saved Blueprints</RouterLink>
         </nav>
       </aside>

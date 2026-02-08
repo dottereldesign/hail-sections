@@ -6,6 +6,9 @@
         <p>Assemble sections into a shareable layout.</p>
       </div>
       <div class="header-actions">
+        <button class="secondary-button" type="button" @click="showFullscreen = true">
+          Preview
+        </button>
         <button class="primary-button" type="button" @click="saveBlueprint">
           Save Blueprint
         </button>
@@ -22,61 +25,60 @@
 
     <div v-else class="blueprint-list">
       <article v-for="item in items" :key="item.instanceId" class="blueprint-card">
-        <div class="card-header">
-          <div>
-            <p class="card-title">{{ getItemTitle(item) }}</p>
-            <p class="card-subtitle">{{ getItemSubtitle(item) }}</p>
-          </div>
-          <div class="card-actions">
-            <button class="chip" type="button" @click="moveUp(item.instanceId)">
-              Up
-            </button>
-            <button class="chip" type="button" @click="moveDown(item.instanceId)">
-              Down
-            </button>
-            <button class="chip danger" type="button" @click="remove(item.instanceId)">
-              Remove
-            </button>
-          </div>
+        <div class="card-actions">
+          <button class="chip" type="button" @click="moveUp(item.instanceId)">
+            Up
+          </button>
+          <button class="chip" type="button" @click="moveDown(item.instanceId)">
+            Down
+          </button>
+          <button class="chip danger" type="button" @click="remove(item.instanceId)">
+            Remove
+          </button>
         </div>
 
-        <div class="card-preview">
+        <component
+          v-if="getSection(item.sectionId)"
+          :is="getSection(item.sectionId)?.component"
+          v-bind="item.props"
+          class="blueprint-component"
+        />
+        <div v-else class="missing-card">
+          <p>Missing section definition.</p>
+          <button class="chip danger" type="button" @click="remove(item.instanceId)">
+            Remove
+          </button>
+        </div>
+      </article>
+    </div>
+
+    <div v-if="showFullscreen" class="fullscreen-overlay" role="dialog" aria-modal="true">
+      <div class="fullscreen-content">
+        <article v-for="item in items" :key="item.instanceId" class="fullscreen-item">
           <component
             v-if="getSection(item.sectionId)"
             :is="getSection(item.sectionId)?.component"
             v-bind="item.props"
+            class="blueprint-component"
           />
           <div v-else class="missing-card">
             <p>Missing section definition.</p>
-            <button class="chip danger" type="button" @click="remove(item.instanceId)">
-              Remove
-            </button>
           </div>
-        </div>
-      </article>
+        </article>
+      </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { blueprintStore } from "../lib/blueprintStore";
 import { getSection } from "../lib/registry";
 
 const router = useRouter();
 const items = computed(() => blueprintStore.current.value.items);
-
-const getItemTitle = (item: { sectionId: string }) => {
-  const section = getSection(item.sectionId);
-  return section ? section.name : "Unknown section";
-};
-
-const getItemSubtitle = (item: { sectionId: string; variantId: string }) => {
-  const section = getSection(item.sectionId);
-  const variant = section?.variants.find((entry) => entry.id === item.variantId);
-  return variant ? `Variant: ${variant.label}` : "Variant: Unknown";
-};
+const showFullscreen = ref(false);
 
 const remove = (instanceId: string) => blueprintStore.removeItem(instanceId);
 const moveUp = (instanceId: string) => blueprintStore.moveItemUp(instanceId);
@@ -89,6 +91,19 @@ const saveBlueprint = () => {
   blueprintStore.saveCurrentBlueprint(name);
   router.push("/blueprints");
 };
+
+const exitOnEscape = (event: KeyboardEvent) => {
+  if (event.key !== "Escape") return;
+  showFullscreen.value = false;
+};
+
+onMounted(() => {
+  window.addEventListener("keydown", exitOnEscape);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", exitOnEscape);
+});
 </script>
 
 <style scoped>
@@ -156,41 +171,31 @@ const saveBlueprint = () => {
 
 .blueprint-list {
   display: grid;
-  gap: 20px;
+  gap: 0;
 }
 
 .blueprint-card {
-  background: #ffffff;
-  border-radius: 20px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  padding: 20px;
+  position: relative;
   display: grid;
-  gap: 16px;
-}
-
-.card-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-}
-
-.card-title {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.card-subtitle {
-  margin: 4px 0 0;
-  color: #64748b;
+  gap: 10px;
 }
 
 .card-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.blueprint-card:hover .card-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .chip {
@@ -212,10 +217,27 @@ const saveBlueprint = () => {
   color: #991b1b;
 }
 
-.card-preview {
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 16px;
+.blueprint-component {
+  border-radius: 0 !important;
+  position: relative;
+  z-index: 1;
+}
+
+.fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 50;
+  display: grid;
+}
+
+.fullscreen-content {
+  overflow: auto;
+  display: grid;
+}
+
+.fullscreen-item {
+  display: block;
 }
 
 .missing-card {

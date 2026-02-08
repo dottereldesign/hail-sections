@@ -8,8 +8,8 @@
     </header>
 
     <div v-if="saved.length === 0" class="empty-state">
-      <p>No saved blueprints yet. Save one from the Blueprint page.</p>
-      <RouterLink to="/blueprint" class="empty-link">Go to Blueprint</RouterLink>
+      <p>No saved blueprints yet. Save one from the Workspace page.</p>
+      <RouterLink to="/workspace" class="empty-link">Go to Workspace</RouterLink>
     </div>
 
     <div v-else class="blueprint-grid">
@@ -52,7 +52,7 @@ const formatDate = (value: string) => {
 
 const load = (id: string) => {
   blueprintStore.loadSavedBlueprintIntoCurrent(id);
-  router.push("/blueprint");
+  router.push("/workspace");
 };
 
 const rename = (id: string) => {

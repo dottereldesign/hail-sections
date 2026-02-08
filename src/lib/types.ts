@@ -1,6 +1,6 @@
 import type { Component } from "vue";
 
-export type CategoryId = "footers" | "social-links";
+export type CategoryId = "footers" | "heroes" | "navbars" | "social-links";
 export type SectionId = string;
 
 export type SectionVariant = {

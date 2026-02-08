@@ -1,45 +1,36 @@
 <template>
   <section class="page" v-if="category">
-    <header class="page-header">
-      <h1>{{ category.name }}</h1>
-      <p>{{ category.description }}</p>
-    </header>
-
     <div class="sections">
-      <article v-for="section in sections" :key="section.id" class="section-card">
-        <div class="section-meta">
-          <h2>{{ section.name }}</h2>
-          <p>{{ section.description }}</p>
-        </div>
+      <article
+        v-for="section in sections"
+        :key="section.id"
+        class="section-card"
+      >
+        <p class="section-label">{{ section.name }}</p>
 
-        <div class="section-preview">
-          <component
-            :is="section.component"
-            v-bind="getSelectedVariant(section).fixture"
-          />
-        </div>
+        <component
+          :is="section.component"
+          v-bind="getSelectedVariant(section).fixture"
+          class="section-component"
+        />
 
-        <div class="section-variants">
-          <div class="variants-header">
-            <p class="variants-title">Variants</p>
-            <button class="add-button" type="button" @click="addToBlueprint(section)">
-              Add to Blueprint
-            </button>
-          </div>
-          <div class="variant-list">
-            <button
-              v-for="variant in section.variants"
-              :key="variant.id"
-              class="variant-pill"
-              :class="{ active: variant.id === getSelectedVariant(section).id }"
-              type="button"
-              title="Variant switching coming soon"
-              @click="selectVariant(section.id, variant.id)"
-            >
-              {{ variant.label }}
-            </button>
-          </div>
-        </div>
+        <button
+          class="add-button"
+          :class="{ added: isAdded(section.id) }"
+          type="button"
+          @click="addToBlueprint(section)"
+        >
+          <span v-if="isAdded(section.id)" class="add-icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" role="presentation">
+              <path
+                d="M6.2 11.3 2.9 8l1-1 2.3 2.3 5-5 1 1-6 6z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <span v-else class="add-icon" aria-hidden="true">+</span>
+          {{ isAdded(section.id) ? "Added" : "Add to Workspace" }}
+        </button>
       </article>
     </div>
   </section>
@@ -56,46 +47,46 @@ const route = useRoute();
 const categoryId = computed(() => route.params.categoryId as CategoryId);
 const category = computed(() => getCategory(categoryId.value));
 const sections = computed(() =>
-  category.value ? getSectionsByCategory(category.value.id) : []
+  category.value ? getSectionsByCategory(category.value.id) : [],
 );
 
 const selectedVariantIds = reactive<Record<string, string>>({});
+const addedSectionIds = reactive<Record<string, boolean>>({});
 
-const getSelectedVariant = (section: { id: string; variants: { id: string; fixture: Record<string, unknown> }[] }) => {
+const getSelectedVariant = (section: {
+  id: string;
+  variants: { id: string; fixture: Record<string, unknown> }[];
+}) => {
   const fallback = section.variants[0];
   const selectedId = selectedVariantIds[section.id] ?? fallback.id;
-  return section.variants.find((variant) => variant.id === selectedId) ?? fallback;
+  return (
+    section.variants.find((variant) => variant.id === selectedId) ?? fallback
+  );
 };
 
 const selectVariant = (sectionId: string, variantId: string) => {
   selectedVariantIds[sectionId] = variantId;
 };
 
-const addToBlueprint = (section: { id: string; variants: { id: string; fixture: Record<string, unknown> }[] }) => {
+const addToBlueprint = (section: {
+  id: string;
+  variants: { id: string; fixture: Record<string, unknown> }[];
+}) => {
   const variant = getSelectedVariant(section);
   blueprintStore.addItem(section.id, variant.id, variant.fixture);
+  addedSectionIds[section.id] = true;
+  window.setTimeout(() => {
+    addedSectionIds[section.id] = false;
+  }, 1200);
 };
+
+const isAdded = (sectionId: string) => Boolean(addedSectionIds[sectionId]);
 </script>
 
 <style scoped>
 .page {
   display: grid;
   gap: 24px;
-}
-
-.page-header {
-  display: grid;
-  gap: 8px;
-}
-
-.page-header h1 {
-  margin: 0;
-  font-size: 2rem;
-}
-
-.page-header p {
-  margin: 0;
-  color: #475569;
 }
 
 .sections {
@@ -108,79 +99,68 @@ const addToBlueprint = (section: { id: string; variants: { id: string; fixture: 
   gap: 18px;
   padding: 22px;
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 0;
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.section-meta h2 {
-  margin: 0 0 6px;
-  font-size: 1.3rem;
-}
-
-.section-meta p {
+.section-label {
   margin: 0;
-  color: #475569;
-}
-
-.section-preview {
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 16px;
-}
-
-.section-variants {
-  display: grid;
-  gap: 8px;
-}
-
-.variants-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.variants-title {
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #94a3b8;
-  margin: 0;
+}
+
+.section-component {
+  border-radius: 0 !important;
 }
 
 .add-button {
   border: none;
-  background: #0f172a;
-  color: #f8fafc;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: var(--hail-green);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 0.125rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-family: "Poppins", "PoppinsBlack", "PoppinsBold", sans-serif;
+  font-weight: 500;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+  width: max-content;
+  height: 2.75rem;
 }
 
 .add-button:hover {
-  background: #1e293b;
+  background: #5f9526;
 }
 
-.variant-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.add-button.added {
+  background: #64b2ab;
+  color: #fff;
 }
 
-.variant-pill {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #ffffff;
-  color: #0f172a;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
+.add-button.added:hover {
+  background: #559c96;
 }
 
-.variant-pill.active {
-  background: #0f172a;
-  color: #f8fafc;
-  border-color: #0f172a;
+.add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.add-icon svg {
+  width: 16px;
+  height: 16px;
 }
 </style>
